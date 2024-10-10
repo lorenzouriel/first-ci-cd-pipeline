@@ -1,40 +1,66 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy Static App to Azure
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
+      - dev
+      - qa
       - main
 
 jobs:
-  build_and_deploy_job:
-    if: (github.event_name == 'pull_request' && github.event.action != 'closed')
+  deploy_dev:
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Deploy to Dev Environment
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
-        id: builddeploy
+      - name: Build And Deploy to Dev
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LIVELY_GRASS_003C4AA0F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} 
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DEV }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "/" 
           api_location: "" 
           output_location: "." 
 
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+  deploy_qa:
+    if: github.ref == 'refs/heads/qa'
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
+    name: Deploy to QA Environment
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Build And Deploy to QA
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LIVELY_GRASS_003C4AA0F }}
-          action: "close"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_QA }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/" 
+          api_location: "" 
+          output_location: "." 
+
+  deploy_prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Deploy to Prod Environment
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Build And Deploy to Prod
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MAIN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/" 
+          api_location: "" 
+          output_location: "."
